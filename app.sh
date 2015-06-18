@@ -25,8 +25,8 @@ local URL="https://raw.githubusercontent.com/wiki/SELinuxProject/selinux/files/r
 
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
-make install ARCH="arm" PREFIX="${DEST}" INCLUDEDIR="${DEPS}/include" INCDIR="${DEPS}/include/sepol" LIBDIR="${DEST}/lib" SHLIBDIR="${DEST}/lib" MAN3DIR="${DEPS}/man" MAN8DIR="${DEPS}/man" BINDIR="${DEPS}/bin"
-rm -vf "${DEST}/lib/libsepol.a"
+make install ARCH="arm" DESTDIR="${DEPS}" PREFIX="${DEPS}"
+rm -vf "${DEPS}/lib/libsepol.so"*
 popd
 }
 
@@ -40,8 +40,8 @@ local URL="https://raw.githubusercontent.com/wiki/SELinuxProject/selinux/files/r
 
 _download_tgz "${FILE}" "${URL}" "${FOLDER}"
 pushd "target/${FOLDER}"
-make -j1 install ARCH="arm" PREFIX="${DEST}" INCLUDEDIR="${DEPS}/include" INCDIR="${DEPS}/include/selinux" LIBDIR="${DEST}/lib" SHLIBDIR="${DEST}/lib" MAN3DIR="${DEPS}/man" MAN5DIR="${DEPS}/man" MAN8DIR="${DEPS}/man" BINDIR="${DEPS}/bin" USRBINDIR="${DEPS}/sbin" SBINDIR="${DEPS}/sbin" LDLIBS="-L${DEST}/lib -L${DEPS}/lib -lselinux -lpcre"
-rm -vf "${DEST}/lib/libselinux.a"
+make install ARCH="arm" DESTDIR="${DEPS}" PREFIX="${DEPS}"
+rm -vf "${DEPS}/lib/libselinux.so"*
 popd
 }
 
@@ -55,10 +55,31 @@ local URL="http://busybox.net/downloads/${FILE}"
 _download_bz2 "${FILE}" "${URL}" "${FOLDER}"
 cp -vf "src/busybox-${VERSION}-config" "target/${FOLDER}/.config"
 pushd "target/${FOLDER}"
-make
-make install
-"${STRIP}" -s -R .comment -R .note -R .note.ABI-tag "${DEST}/bin/busybox" "${DEST}/lib/libsepol.so.1" "${DEST}/lib/libselinux.so.1"
+make LDLIBS="selinux sepol pcre crypt m"
+make install LDLIBS="selinux sepol pcre m"
 popd
+}
+
+_build_rootfs() {
+mv -vf "${DEST}/usr/sbin/adduser" "${DEST}/bin/adduser"
+mv -vf "${DEST}/usr/sbin/addgroup" "${DEST}/bin/addgroup"
+mv -vf "${DEST}/usr/sbin/deluser" "${DEST}/bin/deluser"
+mv -vf "${DEST}/usr/sbin/delgroup" "${DEST}/bin/delgroup"
+mv -vf "${DEST}/sbin/ip" "${DEST}/bin/ip"
+mv -vf "${DEST}/sbin/ipaddr" "${DEST}/bin/ipaddr"
+mv -vf "${DEST}/sbin/iplink" "${DEST}/bin/iplink"
+mv -vf "${DEST}/sbin/iproute" "${DEST}/bin/iproute"
+mv -vf "${DEST}/sbin/iprule" "${DEST}/bin/iprule"
+mv -vf "${DEST}/sbin/iptunnel" "${DEST}/bin/iptunnel"
+mv -vf "${DEST}/usr/sbin/arping" "${DEST}/usr/bin/arping"
+mv -vf "${DEST}/usr/sbin/chat" "${DEST}/usr/bin/chat"
+mv -vf "${DEST}/usr/sbin/ether-wake" "${DEST}/usr/bin/ether-wake"
+mv -vf "${DEST}/bin/kbd_mode" "${DEST}/usr/bin/kbd_mode"
+mv -vf "${DEST}/usr/sbin/killall5" "${DEST}/usr/bin/killall5"
+mv -vf "${DEST}/usr/sbin/readahead" "${DEST}/usr/bin/readahead"
+mv -vf "${DEST}/usr/sbin/rtcwake" "${DEST}/usr/bin/rtcwake"
+mv -vf "${DEST}/usr/sbin/tftpd" "${DEST}/usr/bin/tftpd"
+
 }
 
 _build() {
