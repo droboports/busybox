@@ -53,8 +53,10 @@ local FILE="${FOLDER}.tar.bz2"
 local URL="http://busybox.net/downloads/${FILE}"
 
 _download_bz2 "${FILE}" "${URL}" "${FOLDER}"
-cp -vf "src/busybox-${VERSION}-config" "target/${FOLDER}/.config"
+cp -vf "src/${FOLDER}-restorecon-prune.patch" "target/${FOLDER}/"
+cp -vf "src/${FOLDER}-config" "target/${FOLDER}/.config"
 pushd "target/${FOLDER}"
+patch -p1 -i "${FOLDER}-restorecon-prune.patch"
 make LDLIBS="selinux sepol pcre crypt m"
 make install LDLIBS="selinux sepol pcre m"
 popd

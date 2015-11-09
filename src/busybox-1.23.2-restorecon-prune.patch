@@ -1,0 +1,18 @@
+diff -ru a/selinux/setfiles.c b/selinux/setfiles.c
+--- a/selinux/setfiles.c	2015-03-22 20:06:55.000000000 -0700
++++ b/selinux/setfiles.c	2015-11-06 10:50:44.790169875 -0800
+@@ -435,6 +435,13 @@
+ 		void *userData UNUSED_PARAM,
+ 		int depth UNUSED_PARAM)
+ {
++	char *my_file;
++	my_file = bb_simplify_path(file);
++	if (excludeCtr > 0 && exclude(my_file)) {
++		free(my_file);
++		return SKIP;
++	}
++	free(my_file);
+ 	if (!follow_mounts) {
+ 		/* setfiles does not process across different mount points */
+ 		if (sb->st_dev != dev_id) {
+
